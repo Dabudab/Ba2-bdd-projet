@@ -30,6 +30,11 @@ class DataBaseHandler:
                 l.append(elements)
             retour.append(l)
         return retour
+
+    def modifDF(self, lhs, rhs, table, oldlhs, oldrhs):
+        self.cursor.execute('''UPDATE FuncDep SET lhs = ?, rhs = ? WHERE FuncDep.'table' = ? AND lhs = ? AND rhs = ?''',
+                            (lhs, rhs, table, oldlhs, oldrhs))
+        self.connection.commit()
     
     def CandidateKey(self, table, key):
         query=f"""SELECT rhs from FuncDep WHERE FuncDep.'table'=?"""
