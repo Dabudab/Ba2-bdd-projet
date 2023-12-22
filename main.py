@@ -13,7 +13,7 @@ def menu_principal():
     print("3. Supprimer une DP")
     print("4. Analyser des DP")
     print("5. Montrer les DP")
-    print("6. Quitter")
+    print("6. Quitter\n")
     try:
         choice = input("Entrez votre choix: ")
         fonctio = int(choice)
@@ -28,12 +28,13 @@ def menu_principal():
             delete()
 
         elif fonctio == 4:
-            return
+            menuAnalyse()
 
         elif fonctio == 5:
             show()
 
         elif fonctio == 6:
+            cls()
             exit()
 
         else:
@@ -47,7 +48,7 @@ def menu_principal():
 def init():
     cls()
     global dbh
-    bdd = input("Entrez le nom du fichier contenant la BDD: ")
+    bdd = input("Bonjour, Veuillez entrez le nom du fichier contenant la Base de Données: ")
     dbh = DataBaseHandler(bdd)
     menu_principal()
 
@@ -56,8 +57,8 @@ def add():
     cls()
     tableName = input("Entrez le nom de la table dans laquelle vous voulez ajouter une DP: ")
 
-    if True == False:
-        input("Table vide (Appuyez sur Enter pour retourner au menu principal)")
+    if not dbh.tabExist(tableName):
+        input("La table n'existe pas (Appuyez sur Enter pour retourner au menu principal)")
         menu_principal()
     else:
         print("Veuillez séparer les différents éléments par un espace\n")
@@ -169,5 +170,55 @@ def show():
             increment += 1
         input("\nPour retourner au menu principal, appuyez sur Enter")
         menu_principal()
+
+
+
+def menuAnalyse():
+    cls()
+    print("Que souhaitez vous analyser?\n")
+    print("1. Montrer les DF qui ne sont pas respectées")
+    print("2. Montre les DF qui sont des conséquences logiques")
+    print("3. Menu Principal\n")
+    try:
+        choice = input("Entrez votre choix: ")
+        fonctio = int(choice)
+
+        if fonctio == 1:
+            analyse()
+
+        elif fonctio == 2:
+            logic()
+
+        elif fonctio == 3:
+            menu_principal()
+
+        else:
+            input("L'option que vous avez choisi n'existe pas")
+            menuAnalyse()
+
+    except ValueError:
+        input("Une erreur c'est produite lors du choix (Appuyez sur Enter pour revenir au menu principal)")
+        menu_principal()
+
+
+
+def analyse():
+    cls()
+    tableName = input("Veuillez entrer la table dont vous souhaitez vérifier la satisfaction des DFs: ")
+    cls()
+    liste = dbh.getDf()
+    res = dbh.showNotActiveDP(tableName, liste)
+    for ligne in res:
+        print(ligne[0] + "->" + ligne[1])
+    input("\nAppuyez sur Enter pour retourner au menu principal")
+    menu_principal()
+
+
+
+def logic():
+    return
+
+
+
 
 init()

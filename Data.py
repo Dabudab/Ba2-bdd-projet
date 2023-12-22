@@ -49,6 +49,129 @@ class DataBaseHandler:
                 return True
             if key not in l[1]:
                 return False
+
+
+    def showNotActiveDP(self, tableName, liste):
+        print("Liste des DFs de la base de données: \n")
+        for elements in liste:
+            print("Table: " + elements[0] + ", " + elements[1] + " -> " + elements[2])
+        print("\n")
+        res = []
+        for tuples in liste:
+            if tuples[0] == tableName:
+                res.append(tuples)
+
+        print("Liste des DFs de la table" + tableName + ": \n")
+        for lignes in res:
+            print(lignes[1] + " -> " + lignes[2])
+        print("\n")
+
+        print("Liste des DF pour la table " + tableName + " qui ne sont pas satisfaites: \n")
+        dfs = []
+        for ligne in res:
+            dp = self.isDFActive(ligne[0], ligne[1], ligne[2])
+            if dp is not None:
+                dfs.append(dp)
+
+        return dfs
+
+    def isDFActive(self, tableName, lhs, rhs):
+        if type(lhs) == str:
+            newLhs = lhs.split()
+
+        query = "SELECT t1.*, t2." + rhs + " FROM " + tableName + " t1, " + tableName + " t2 WHERE "
+        for attributes in newLhs:
+            query += "t1." + attributes + " == t2." + attributes + " AND "
+        query += "t1." + rhs + " != t2." + rhs
+        self.cursor.execute(query)
+
+        res = []
+
+        for tuples in self.cursor:
+            line = []
+            for item in tuples:
+                line.append(item)
+            line.pop()
+            res.append(line)
+        if len(res) != 0:
+            return lhs, rhs
+
+    def tabExist(self, tableName):
+        query = "SELECT name FROM sqlite_master WHERE type='table'"
+        dbh = self.cursor.execute(query)
+        res = []
+        for lignes in dbh:
+            res.append(lignes)
+
+        flag = False
+        for ligne in res:
+            if tableName in ligne:
+                return True
+        return flag
+
+    def isLogic(self, table, lhs, rhs, remove):
+        if self.dpExist(table, lhs, rhs):
+            res = self.getDf()
+            ens = []
+            for ligne in res:
+                if ligne[0] == table:
+                    ens.append(ligne)
+            if remove:
+                ens.remove([table, lhs, rhs])
+            result = self.fermeture(ens, lhs.split())
+
+            return rhs in result
+        else:
+            return None
+
+    def getLogicDP(self, table):
+        allDF = self.getDf()
+        res = []
+        for ligne in allDF:
+            if ligne[0] == table:
+                res.append(ligne)
+        logic = []
+        for dep in res:
+            if self.isLogic(dep[0], dep[1], dep[2], True):
+                logic.append(dep)
+
+        return logic
+
+    def dpExist(self, table, lhs, rhs):
+        res = self.getDf()
+        for ligne in res:
+            if ligne[0] == table and ligne[1] == lhs and ligne[2] == rhs:
+                return True
+        return False
+
+    def fermeture(self, DF, attribute):
+
+        closure = copy.deepcopy(DF)
+        newDP = copy.deepcopy(attribute)
+        oldDP = None
+
+        while oldDP != newDP:
+            oldDP = copy.deepcopy(newDP)
+            for items in closure:
+                a = items[1]
+                b = items[2]
+
+                if self.isIn(a.split(), newDP):
+                    if b not in newDP:
+                        newDP.append(b)
+        return newDP
+
+    def isIn(self, small, big):
+
+        for sItem in small:
+            sItemIsInBig = False
+            for bItem in big:
+                if sItem == bItem:
+                    sItemIsInBig = True
+            if sItemIsInBig == False:
+                return False
+        return True
+
             
     
     
