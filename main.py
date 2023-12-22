@@ -117,7 +117,7 @@ def modif():
                 input("Veuillez rentrer un caractère correct")
                 modif()
 
-
+#désolé d'avance pour la redondance des methodes logic, analyse et delete
 def delete():
     cls()
 
@@ -226,8 +226,8 @@ def keys():
 def menuAnalyse():
     cls()
     print("Que souhaitez vous analyser?\n")
-    print("1. Montrer les DF qui ne sont pas respectées")
-    print("2. Montre les DF qui sont des conséquences logiques")
+    print("1. Les DF qui ne sont pas respectées")
+    print("2. Les DF qui sont des conséquences logiques d'autres DF")
     print("3. Menu Principal\n")
     try:
         choice = input("Entrez votre choix: ")
@@ -251,22 +251,97 @@ def menuAnalyse():
         menu_principal()
 
 
-
+#désolé d'avance pour la redondance des methodes logic, analyse et delete
 def analyse():
     cls()
     tableName = input("Veuillez entrer la table dont vous souhaitez vérifier la satisfaction des DFs: ")
     cls()
     liste = dbh.getDf()
     res = dbh.showNotActiveDP(tableName, liste)
-    for ligne in res:
-        print(ligne[0] + "->" + ligne[1])
-    input("\nAppuyez sur Enter pour retourner au menu principal")
-    menu_principal()
+    if (len(res)) == 0:
+        input("Aucune DF inutiles présente dans la table (Appuyez sur Enter pour retourner au menu principal)")
+        menu_principal()
+    else:
+        print("Quelle DF voulez vous supprimer? (Enter si aucune)")
+        increment = 1
+        for line in res:
+            print(str(increment) + ". DP :" + line[1] + " -> " + line[2])
+            increment += 1
+
+        try:
+            num = input("Entrez le numero de la ligne : ")
+            nbre = int(num)
+
+            if nbre > (len(res)) or nbre <= 0:
+                input("la ligne que vous avez choisi n'existe pas")
+                menu_principal()
+
+            else:
+                cls()
+                verif = input("Etes vous sur de vouloir supprimer cette DF? (Y/N)")
+
+                if verif == "Y" or verif == "y":
+                    dbh.delDF(res[nbre - 1][0], res[nbre - 1][1], res[nbre - 1][2])
+                    input("DF correctement supprimée, pour retourner au menu principal appuyez sur Enter")
+                    menu_principal()
+
+                elif verif == "N" or verif == "n":
+                    menu_principal()
+
+                else:
+                    cls()
+                    input("Veuillez rentrer un caractère correct")
+
+
+        except ValueError:
+            menu_principal()
 
 
 
+
+#désolé d'avance pour la redondance des methodes logic, analyse et delete
 def logic():
-    return
+    cls()
+    tableName = input("Veuillez entrer la table dont vous souhaitez vérifier des DFs: ")
+    cls()
+    liste = dbh.getLogicDP(tableName)
+    if (len(liste)) == 0:
+        input("Aucune DF inutiles présente dans la table (Appuyez sur Enter pour retourner au menu principal)")
+        menu_principal()
+    else:
+        print("Quelle DF voulez vous supprimer? (Enter si aucune)")
+        increment = 1
+        for line in liste:
+            print(str(increment) + ".  Table: " + line[0] + "  DP :" + line[1] + " -> " + line[2])
+            increment += 1
+
+        try:
+            num = input("Entrez le numero de la ligne : ")
+            nbre = int(num)
+
+            if nbre > (len(liste)) or nbre <= 0:
+                input("la ligne que vous avez choisi n'existe pas")
+                menu_principal()
+
+            else:
+                cls()
+                verif = input("Etes vous sur de vouloir supprimer cette DF? (Y/N)")
+
+                if verif == "Y" or verif == "y":
+                    dbh.delDF(liste[nbre - 1][0], liste[nbre - 1][1], liste[nbre - 1][2])
+                    input("DF correctement supprimée, pour retourner au menu principal appuyez sur Enter")
+                    menu_principal()
+
+                elif verif == "N" or verif == "n":
+                    menu_principal()
+
+                else:
+                    cls()
+                    input("Veuillez rentrer un caractère correct")
+
+
+        except ValueError:
+            menu_principal()
 
 
 

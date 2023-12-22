@@ -94,7 +94,7 @@ class DataBaseHandler:
             line.pop()
             res.append(line)
         if len(res) != 0:
-            return lhs, rhs
+            return tableName, lhs, rhs
 
     def tabExist(self, tableName):
         query = "SELECT name FROM sqlite_master WHERE type='table'"
