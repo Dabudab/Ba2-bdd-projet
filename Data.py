@@ -1,5 +1,6 @@
 import sqlite3
 import os, itertools,copy
+from typing import Any
 
 class DataBaseHandler:
 
@@ -44,38 +45,10 @@ class DataBaseHandler:
             if key not in l[1]:
                 return False
             
+    
+    
     def getKey(self,table):
-        query=f"""SELECT * from FuncDep WHERE FuncDep.'table'=?"""
-        self.cursor.execute(query,(table,))
-        dumpdb=self.cursor.fetchall()
-        left_candidate=[]
-        right_candidate=[]
-        candidate=[]
-        alllist={}
-        for line in dumpdb:
-            name, lhs, rhs=line
-            alllist[lhs]=rhs
-            if " " in lhs:
-                temp=lhs.split(" ")
-                for c in temp:
-                    if c not in left_candidate:
-                        left_candidate.append(c)
-            else:
-                if lhs not in candidate:
-                    left_candidate.append(lhs)
-        
-            if " " in rhs:
-                temp=rhs.split(" ")
-                for c in temp:
-                    if c not in right_candidate:
-                        right_candidate.append(c)
-            else:
-                if rhs not in candidate:
-                    right_candidate.append(rhs)
-        print(left_candidate, right_candidate)
-        
-        candidate= list(set(left_candidate+right_candidate)) 
-        
+        generate,left_candidate,righ_candidate,alllist=self.getAttribute(table) 
         keys=[]
         for i in range(1,len(left_candidate)+1):
             for comb in itertools.combinations(left_candidate,i):
@@ -83,10 +56,11 @@ class DataBaseHandler:
                 flagp=True
                 while(flagp):
                     flagp=False
-                    if len(base)==len(candidate):
-                        keys.append(comb)
+                    if len(base)==len(generate):
+                        keys.append(list(comb))
                         break
-                    for l in alllist.keys():
+                    for j in range(len(alllist)):
+                        l=alllist[j][0]
                         if len(l)>1:
                             p=l.split(" ")
                             flag=True
@@ -94,12 +68,12 @@ class DataBaseHandler:
                                 if e not in base:
                                     flag=False
                                     break
-                            if flag and alllist[l] not in base:
-                                base.append(alllist[l])
+                            if flag and alllist[j][1] not in base:
+                                base.append(alllist[j][1])
                                 flagp=True
                         else:
-                            if l in base and alllist[l] not in base:
-                                base.append(alllist[l])
+                            if l in base and alllist[j][1] not in base:
+                                base.append(alllist[j][1])
                                 flagp=True
     
         validkeys=[]
@@ -108,19 +82,111 @@ class DataBaseHandler:
             for j in range(i+1,len(keys)):
                 if  keys[j] in validkeys and set(keys[i])<=set(keys[j]) :            
                     validkeys.remove(keys[j])
-                    
-                    
 
+        return validkeys
 
-
+    def getAttribute(self,table):
+        query=f"""SELECT * from FuncDep WHERE FuncDep.'table'=?"""
+        self.cursor.execute(query,(table,))
+        dumpdb=self.cursor.fetchall()
+        left_candidate=[]
+        right_candidate=[]
+        generate=[]
+        dfdic=[]
+        for line in dumpdb:
+            name, lhs, rhs=line
+            dfdic.append([lhs,rhs])
+            if " " in lhs:
+                temp=lhs.split(" ")
+                for c in temp:
+                    if c not in left_candidate:
+                        left_candidate.append(c)
+            else:
+                if lhs not in generate:
+                    left_candidate.append(lhs)
         
+            if " " in rhs:
+                temp=rhs.split(" ")
+                for c in temp:
+                    if c not in right_candidate:
+                        right_candidate.append(c)
+            else:
+                if rhs not in right_candidate:
+                    right_candidate.append(rhs)
+        
+        generate= list(set(left_candidate+right_candidate))
+        return generate,left_candidate,right_candidate,dfdic
+    
+    
+    def is3NF(self,table):
+        """
+            Regarde si tous les attributs dépendants sont premiers sinon, vérifie que chaque élément
+            dépend d'une clé candidate.
+        """
+
+        keys=self.getKey(table)
+        attributes, lhs, rhs, dfdic=self.getAttribute(table)
+        baddf=[]
+        count=0
+        flag=True
+        #Verifie si tous les attributs dépendants sont premiers.
+        for key in keys:
+            for r in rhs:
+                if r in key:
+                    count+=1
+                    break
+        if count==len(rhs):
+            return baddf
+        #Verifie que chaque attribut de la partie gauche d'une DF est une clé.
+        else:  
+            for j in range(len(dfdic)):
+                l=dfdic[j][0]
+                if " " in l:
+                    temp=l.split(" ")
+                if temp not in keys:
+                    baddf.append([l,dfdic[j][1]])
+                    flag=False          
+        if not flag:
+                return baddf
+        return baddf
+                    
+
+    def isBCNF(self,table):
+        """
+            Vérifie si la table est en 3NF, sinon forcément pas en BCNF, si oui il faut vérifier
+            que chaque dépendance repose sur une clé candidate.
+        """
+        baddf=self.is3NF(table)
+        #SI TABLE PAS EN 3NF ALORS PAS EN BCNF
+        if len(baddf) != 0:
+            return baddf
+        
+        #SI ATTRIBUT DEPEND D'AUTRE CHOSE QUE DE LA CLE ALORS TABLE PAS EN BCNF
+        else:
+            flag=True
+            baddf=[]
+            keys=self.getKey(table)
+            attributes, lhs, rhs, dfdic=self.getAttribute(table)
+            for j in range(len(dfdic)):
+                l=dfdic[j][0]
+                if " " in l:
+                    temp=l.split(" ")
+                    if temp not in keys:
+                        baddf.append([l,dfdic[j][1]])
+                        flag=False  
+                elif l not in keys:
+                    baddf.append([l,dfdic[j][1]])
+                    flag=False       
+        if not flag:
+                return baddf
+        return baddf
 
 
-
-
+                
             
     
     
 
 
         
+  
