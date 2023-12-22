@@ -2,7 +2,7 @@
 import sqlite3
 
 dataBase = 'tableTest'
-var1 = True
+var1 = False
 var2 = True
 
 # Table1
@@ -62,17 +62,30 @@ if var2:
 
     # creation table FuncDep
     cursor.execute(
-        """CREATE TABLE IF NOT EXISTS FuncDep('table' TEXT NOT NULL, lhs TEXT NOT NULL, rhs TEXT NOT NULL, PRIMARY KEY('FuncDep', lhs, rhs))""")
+        """CREATE TABLE IF NOT EXISTS FuncDep('table' TEXT NOT NULL, lhs TEXT NOT NULL, rhs TEXT NOT NULL, PRIMARY KEY('table', lhs, rhs))""")
     # insertion des DFs
 
-    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""", (table2, 'TITRE DIRECTEUR', 'SOCIETE PREMIERE MINUTES'))
+    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
+                   (table2, 'TITRE DIRECTEUR', 'SOCIETE'))
+
+    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
+                   (table2, 'TITRE DIRECTEUR', 'PREMIERE'))
+
+    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
+                   (table2, 'TITRE DIRECTEUR', 'MINUTES'))
 
     cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
                    (table2, 'DIRECTEUR PREMIERE', 'TITRE'))
-    '''
-    cursor.execute(""" INSERT INTO FuncDep('FuncDep', lhs, rhs) VALUES (?,?,?)""",
-                   (table2, 'ACTEUR PREMIERE', 'TITRE DIRECTEUR'))
-    '''
+
+    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
+                   (table2, 'ACTEUR PREMIERE', 'TITRE'))
+
+    cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""",
+                   (table2, 'ACTEUR PREMIERE', 'DIRECTEUR'))
+
+
+
+
     db.commit()
     db.close()
 
