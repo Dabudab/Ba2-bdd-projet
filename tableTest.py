@@ -2,7 +2,7 @@
 import sqlite3
 
 dataBase = 'tableTest'
-var1 = False
+var1 = True
 var2 = True
 
 # Table1
@@ -21,7 +21,7 @@ if var1:
                    ("2", "FRANCE", "THOMAS", "OUI"))
     # creation table FuncDep
     cursor.execute(
-        """CREATE TABLE IF NOT EXISTS FuncDep('FuncDep' TEXT NOT NULL, lhs TEXT NOT NULL, rhs TEXT NOT NULL, PRIMARY KEY('FuncDep', lhs, rhs))""")
+        """CREATE TABLE IF NOT EXISTS FuncDep('table' TEXT NOT NULL, lhs TEXT NOT NULL, rhs TEXT NOT NULL, PRIMARY KEY('table', lhs, rhs))""")
     # insertion des DFs
     cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""", (table1, 'NUMERO PAYS', 'NOM'))
     cursor.execute(""" INSERT INTO FuncDep('table', lhs, rhs) VALUES (?,?,?)""", (table1, 'NUMERO PAYS', 'REGION'))
