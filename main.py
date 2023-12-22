@@ -13,7 +13,9 @@ def menu_principal():
     print("3. Supprimer une DP")
     print("4. Analyser des DP")
     print("5. Montrer les DP")
-    print("6. Quitter")
+    print("6. Formes normales")
+    print("7. Déterminer les clés")
+    print("8. Quitter")
     try:
         choice = input("Entrez votre choix: ")
         fonctio = int(choice)
@@ -34,6 +36,12 @@ def menu_principal():
             show()
 
         elif fonctio == 6:
+            nftest()
+
+        elif fonctio == 7:
+            keys()
+
+        elif fonctio == 8:
             exit()
 
         else:
@@ -169,5 +177,47 @@ def show():
             increment += 1
         input("\nPour retourner au menu principal, appuyez sur Enter")
         menu_principal()
+
+def nftest():
+    cls()
+    choice = input("Voulez vous vérifier que la table est en 3NF(1) ou en BCNF(2) ?")
+
+    if choice == '1':
+        table = input("Sur quelle table voulez-vous faire le test?")
+        baddf = dbh.is3NF(table)
+        if len(baddf) == 0:
+            print("Cette table est bien en 3eme forme normale")
+
+        if len(baddf) != 0:
+            print("Votre table n'est pas en 3ème forme normale et voici les DFs qui l'en empêche: \n")
+            for i in range(len(baddf)):
+                print(baddf[i], end="\n")
+
+        input("\nPour retourner au menu principal, appuyez sur Enter")
+        menu_principal()
+
+    if choice == '2':
+        table = input("Sur quelle table voulez-vous faire le test?")
+        baddf = dbh.isBCNF(table)
+        if len(baddf) == 0:
+            print("Cette table est bien en forme normale de Boyce Codd")
+
+        if len(baddf) != 0:
+            print("Votre table n'est pas en forme normale de Boyce Codd et voici les DFs qui l'en empêche: \n")
+            for i in range(len(baddf)):
+                print(baddf[i], end="\n")
+
+        input("\nPour retourner au menu principal, appuyez sur Enter")
+        menu_principal()
+
+def keys():
+    table = input("De quelle table voulez-vous déterminer les clés? ")
+    keys = dbh.getKey(table)
+    print("Les clés induites par les DFs de cette tables sont: ")
+    for key in keys:
+        print(key, end="\n")
+    input("Appuyez sur Entrer pour retourner au menu principal")
+    menu_principal()
+
 
 init()
